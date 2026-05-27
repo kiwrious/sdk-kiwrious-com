@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiwrious WebSerial - ESM Demo</title>
+    
+    <!-- Kiwrious Theme -->
+    <link rel="stylesheet" href="https://stakcos.com/kiwrious/cdn/css/theme.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-secondary);
+            color: var(--color-text-dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--gradient-primary);
+            padding: 30px;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-family: var(--font-family-primary);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-white);
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: var(--color-secondary);
+            font-size: 1.1em;
+            font-weight: var(--font-weight-medium);
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--color-bg-white);
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-default);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* Status Section */
+        .status-section {
+            margin-bottom: 25px;
+        }
+
+        .status {
+            padding: 15px 20px;
+            border-radius: var(--border-radius-medium);
+            font-weight: var(--font-weight-semibold);
+            font-size: 1.1em;
+            text-align: center;
+            transition: all var(--transition-default) var(--transition-ease-in-out);
+            border: 2px solid transparent;
+        }
+
+        .status.disconnected {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF8BA0 100%);
+            color: #8B0000;
+            border-color: #FF6B8A;
+        }
+
+        .status.connected {
+            background: linear-gradient(135deg, #90EE90 0%, #7ED97E 100%);
+            color: #006400;
+            border-color: #5DBD5D;
+        }
+
+        .status.warming-up {
+            background: linear-gradient(135deg, #FFE4B5 0%, #FFD89B 100%);
+            color: #8B4513;
+            border-color: #FFC870;
+        }
+
+        /* Button Section */
+        .button-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .button {
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: var(--border-radius-medium);
+            font-family: var(--font-family-secondary);
+            font-weight: var(--font-weight-bold);
+            transition: all var(--transition-default) var(--transition-ease-in-out);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .button.primary {
+            background: var(--color-primary);
+            color: var(--color-text-white);
+        }
+
+        .button.secondary {
+            background: var(--color-primary-dark);
+            color: var(--color-text-white);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Info Box */
+        .info-box {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--color-secondary);
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            border-radius: 0 var(--border-radius-medium) var(--border-radius-medium) 0;
+            color: var(--color-primary-dark);
+            font-weight: var(--font-weight-medium);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-family: var(--font-family-primary);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary-dark);
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--color-secondary);
+        }
+
+        /* Sensor Table */
+        #sensorTableContainer {
+            margin: 15px 0;
+            overflow-x: auto;
+            border-radius: var(--border-radius-medium);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sensor-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-bg-white);
+            font-size: 0.95em;
+        }
+
+        .sensor-table thead {
+            background: var(--gradient-primary);
+            color: var(--color-text-white);
+        }
+
+        .sensor-table th {
+            padding: 15px 20px;
+            text-align: left;
+            font-family: var(--font-family-primary);
+            font-weight: var(--font-weight-bold);
+            font-size: 1em;
+            letter-spacing: 0.3px;
+            border-bottom: 3px solid var(--color-secondary);
+        }
+
+        .sensor-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: all var(--transition-default) var(--transition-ease-in-out);
+        }
+
+        .sensor-table tbody tr:hover:not(.empty-state) {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transform: scale(1.005);
+        }
+
+        .sensor-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .sensor-table td {
+            padding: 15px 20px;
+            color: var(--color-text-dark);
+            font-family: var(--font-family-secondary);
+        }
+
+        .sensor-table td:first-child {
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary-dark);
+        }
+
+        .sensor-table td:nth-child(3) {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-primary);
+            font-size: 1.05em;
+        }
+
+        .sensor-table .empty-state td {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .sensor-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: var(--border-radius-round);
+            font-size: 0.85em;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .sensor-status.active {
+            background: linear-gradient(135deg, #90EE90 0%, #7ED97E 100%);
+            color: #006400;
+        }
+
+        .sensor-status.warming {
+            background: linear-gradient(135deg, #FFE4B5 0%, #FFD89B 100%);
+            color: #8B4513;
+        }
+
+        .sensor-status.inactive {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF8BA0 100%);
+            color: #8B0000;
+        }
+
+        /* Sensor row grouping visual */
+        .sensor-table tbody tr[data-sensor-id]:first-of-type {
+            border-top: 3px solid var(--color-secondary);
+        }
+
+        .sensor-table tbody tr.same-sensor {
+            border-top: none;
+        }
+
+        /* Notes Section */
+        .notes-card {
+            background: var(--color-bg-white);
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-default);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .notes-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .notes-card li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+            color: var(--color-text-dark);
+        }
+
+        .notes-card li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--color-secondary);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* Documentation Section */
+        .docs-section {
+            background: var(--gradient-primary);
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-card);
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .docs-section h3 {
+            font-family: var(--font-family-primary);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-white);
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .docs-section ul {
+            list-style: none;
+            padding-left: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .docs-section li {
+            margin: 0;
+        }
+
+        .docs-section a {
+            display: block;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--color-text-white);
+            text-decoration: none;
+            border-radius: var(--border-radius-medium);
+            transition: all var(--transition-default) var(--transition-ease-in-out);
+            font-weight: var(--font-weight-medium);
+            border: 2px solid transparent;
+        }
+
+        .docs-section a:hover {
+            background: var(--color-bg-white);
+            color: var(--color-primary);
+            border-color: var(--color-secondary);
+            transform: translateX(5px);
+        }
+
+        .docs-section a::before {
+            content: "📄";
+            margin-right: 8px;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--color-secondary);
+            color: var(--color-primary-dark);
+            border-radius: var(--border-radius-round);
+            font-size: 0.85em;
+            font-weight: var(--font-weight-bold);
+            margin-left: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.6em;
+            }
+
+            .button-section {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+            .docs-section ul {
+                grid-template-columns: 1fr;
+            }
+
+            .sensor-table th,
+            .sensor-table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔬 Kiwrious WebSerial SDK</h1>
+            <div class="subtitle">ESM Demo & Testing Interface <span class="badge">v2.1</span></div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <!-- Status Section -->
+            <div class="status-section">
+                <div class="status disconnected" id="connectionStatus">
+                    Status: Disconnected ❌
+                </div>
+            </div>
+
+            <!-- Button Section -->
+            <div class="button-section">
+                <button class="button primary" id="connectBtn">Connect Sensor</button>
+                <button class="button secondary" id="disconnectBtn" disabled>Disconnect All</button>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box" id="infoBox" style="display: none;">
+                ℹ️ <span id="infoText"></span>
+            </div>
+
+            <!-- Sensor Data Section -->
+            <h3 class="section-header">Sensor Data <span class="badge" id="sensorCount">0 sensors</span></h3>
+            <div id="sensorTableContainer">
+                <table class="sensor-table" id="sensorTable">
+                    <thead>
+                        <tr>
+                            <th>Sensor Type</th>
+                            <th>Observable</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sensorTableBody">
+                        <tr class="empty-state">
+                            <td colspan="4">No sensors connected. Click "Connect Sensor" to begin...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Notes Card -->
+        <div class="notes-card">
+            <h3 class="section-header">Important Notes</h3>
+            <ul>
+                <li>This demo works with <strong>Chromium-based browsers</strong> (Chrome, Edge, Brave)</li>
+                <li>Requires <strong>Web Serial API</strong> support</li>
+                <li>Click <strong>"Connect Sensor"</strong> multiple times to connect multiple sensors</li>
+                <li><strong>VOC sensors</strong> need 20 seconds warm-up time</li>
+                <li>For heart rate sensors, load external dependencies first (see README)</li>
+            </ul>
+        </div>
+
+        <!-- Documentation Section -->
+        <div class="docs-section">
+            <h3>📚 Documentation</h3>
+            <ul>
+                <li><a href="https://github.com/stakco/stakco.github.io/tree/gh-pages/kiwrious/sdk/QUICKSTART.md" target="_blank" rel="noopener noreferrer">Quick Start Guide</a></li>
+                <li><a href="https://github.com/stakco/stakco.github.io/tree/gh-pages/kiwrious/sdk/MIGRATION.md" target="_blank" rel="noopener noreferrer">Migration Guide</a></li>
+                <li><a href="https://github.com/stakco/stakco.github.io/tree/gh-pages/kiwrious/sdk/COMPARISON.md" target="_blank" rel="noopener noreferrer">CommonJS vs ESM</a></li>
+                <li><a href="https://github.com/stakco/stakco.github.io/tree/gh-pages/kiwrious/sdk/SENSOR_BEHAVIORS.md" target="_blank" rel="noopener noreferrer">Sensor Behaviors</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Load external dependencies for heart rate sensor (optional) -->
+    <!-- Uncomment these if you're using heart rate sensors -->
+    <!--
+    <script src="js/libunicorn.out.js"></script>
+    <script src="js/libelf-integers.js"></script>
+    <script src="js/unicorn-wrapper.js"></script>
+    <script src="js/unicorn-constants.js"></script>
+    <script src="js/heartrate.js"></script>
+    -->
+
+    <!-- Load the Kiwrious library as ES module -->
+    <script type="module">
+        // Import the library
+
+        // Test Published Library
+        import serialService from 'https://stakcos.com/kiwrious/sdk/kiwrious-webserial.esm.min.js'
+        // Test Local Library
+        //import serialService from './kiwrious-webserial.esm.min.js';
+
+        // Get UI elements
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const statusDiv = document.getElementById('connectionStatus');
+        const sensorTableBody = document.getElementById('sensorTableBody');
+        const sensorCount = document.getElementById('sensorCount');
+        const infoBox = document.getElementById('infoBox');
+        const infoText = document.getElementById('infoText');
+
+        // Store connected sensors and their data
+        const connectedSensors = new Map(); // key: sensor ID, value: sensor info
+        let activeSensorCount = 0;
+        let sensorIdCounter = 0;
+
+        // Show info message
+        function showInfo(message) {
+            infoText.textContent = message;
+            infoBox.style.display = 'block';
+            setTimeout(() => {
+                infoBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Update sensor count badge
+        function updateSensorCount() {
+            sensorCount.textContent = `${activeSensorCount} sensor${activeSensorCount !== 1 ? 's' : ''}`;
+        }
+
+        // Update connection status
+        function updateConnectionStatus() {
+            if (activeSensorCount > 0) {
+                statusDiv.textContent = `Status: ${activeSensorCount} Sensor${activeSensorCount !== 1 ? 's' : ''} Connected ✅`;
+                statusDiv.className = 'status connected';
+                disconnectBtn.disabled = false;
+            } else {
+                statusDiv.textContent = 'Status: Disconnected ❌';
+                statusDiv.className = 'status disconnected';
+                disconnectBtn.disabled = true;
+            }
+        }
+
+        // Generate unique sensor ID
+        function generateSensorId(sensorType) {
+            sensorIdCounter++;
+            return `${sensorType}-${sensorIdCounter}-${Date.now()}`;
+        }
+
+        // Update table with sensor data
+        function updateSensorTable() {
+            // Clear table except header
+            sensorTableBody.innerHTML = '';
+
+            if (connectedSensors.size === 0) {
+                // Show empty state
+                const emptyRow = document.createElement('tr');
+                emptyRow.className = 'empty-state';
+                emptyRow.innerHTML = '<td colspan="4">No sensors connected. Click "Connect Sensor" to begin...</td>';
+                sensorTableBody.appendChild(emptyRow);
+                return;
+            }
+
+            // Sort sensors by connection order
+            const sortedSensors = Array.from(connectedSensors.entries()).sort((a, b) => {
+                // Extract counter from sensor ID for sorting
+                const getCounter = (id) => parseInt(id.split('-')[1]) || 0;
+                return getCounter(a[0]) - getCounter(b[0]);
+            });
+
+            // Add rows for each sensor and its observables
+            sortedSensors.forEach(([sensorId, sensorInfo]) => {
+                const { sensorType, observables, isWarming } = sensorInfo;
+                
+                observables.forEach((observable, obsIndex) => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-sensor-id', sensorId);
+                    
+                    // Add class to indicate same sensor group
+                    if (obsIndex > 0) {
+                        row.className = 'same-sensor';
+                    }
+
+                    // Sensor Type (show for all rows but merge visually with rowspan)
+                    const typeCell = document.createElement('td');
+                    typeCell.textContent = sensorType;
+                    if (obsIndex === 0) {
+                        typeCell.setAttribute('rowspan', observables.length);
+                    } else {
+                        typeCell.style.display = 'none';
+                    }
+                    row.appendChild(typeCell);
+
+                    // Observable Label
+                    const labelCell = document.createElement('td');
+                    labelCell.textContent = observable.label;
+                    row.appendChild(labelCell);
+
+                    // Observable Value
+                    const valueCell = document.createElement('td');
+                    let displayValue = '';
+                    
+                    if (observable.type === 'object' && observable.value && observable.value.value !== undefined) {
+                        displayValue = `${observable.value.value} ${observable.unit || ''}`;
+                    } else {
+                        displayValue = `${observable.value} ${observable.unit || ''}`;
+                    }
+                    
+                    valueCell.textContent = displayValue.trim();
+                    row.appendChild(valueCell);
+
+                    // Status (show for all rows but merge visually with rowspan)
+                    const statusCell = document.createElement('td');
+                    if (obsIndex === 0) {
+                        let statusClass = 'active';
+                        let statusText = 'Active';
+                        
+                        if (isWarming) {
+                            statusClass = 'warming';
+                            statusText = 'Warming up...';
+                        }
+                        
+                        statusCell.innerHTML = `<span class="sensor-status ${statusClass}">${statusText}</span>`;
+                        statusCell.setAttribute('rowspan', observables.length);
+                    } else {
+                        statusCell.style.display = 'none';
+                    }
+                    row.appendChild(statusCell);
+
+                    sensorTableBody.appendChild(row);
+                });
+            });
+        }
+
+        // Connection status callback
+        serialService.onSerialConnection = (connected) => {
+            console.log('Connection status changed:', connected);
+            
+            if (!connected && activeSensorCount > 0) {
+                showInfo('⚠️ A sensor has been disconnected');
+            }
+            
+            updateConnectionStatus();
+        };
+
+        // Firmware update callback
+        serialService.onFirmwareUpdateAvailable = (available) => {
+            if (available) {
+                showInfo('⚠️ Firmware update available for your sensor!');
+            }
+        };
+
+        // Data callback - handles multiple sensors
+        serialService.onSerialData = (result) => {
+            const values = result.decodedValues;
+            const sensorType = result.sensorType || 'Unknown';
+            
+            // Create or update sensor entry
+            // We'll identify sensors by type + instance count
+            // For better tracking, you might want to modify the library to provide a unique port ID
+            
+            let sensorId = null;
+            
+            // Try to find existing sensor of this type that was recently updated (within 2 seconds)
+            const now = Date.now();
+            for (const [id, info] of connectedSensors.entries()) {
+                if (info.sensorType === sensorType && (now - info.lastUpdate) < 2000) {
+                    // Found matching sensor type updated recently - update it
+                    sensorId = id;
+                    break;
+                }
+            }
+            
+            // If no existing sensor found, create new entry
+            if (!sensorId) {
+                sensorId = generateSensorId(sensorType);
+                activeSensorCount++;
+                updateSensorCount();
+                updateConnectionStatus();
+                console.log(`New sensor connected: ${sensorId}`);
+            }
+            
+            // Check if this is a VOC sensor and if it's warming up
+            const isVOCSensor = sensorType.toLowerCase().includes('voc') || sensorType.toLowerCase().includes('air');
+            let isWarming = false;
+            
+            // Check for warming up status in values
+            values.forEach(value => {
+                if (value.type === 'object' && value.value && value.value.status === 'warming_up') {
+                    isWarming = true;
+                }
+            });
+            
+            // Store sensor information
+            connectedSensors.set(sensorId, {
+                sensorType: sensorType,
+                observables: values,
+                isWarming: isWarming && isVOCSensor,
+                lastUpdate: now
+            });
+            
+            // Update the table
+            updateSensorTable();
+        };
+
+        // Connect button - allows connecting multiple sensors
+        connectBtn.addEventListener('click', async () => {
+            try {
+                showInfo('🔌 Opening sensor selection dialog...');
+                await serialService.connectAndReadAsync();
+                showInfo('✅ Sensor connected successfully!');
+            } catch (error) {
+                console.error('Connection error:', error);
+                
+                if (error.message.includes('No port selected')) {
+                    showInfo('❌ Connection cancelled - no sensor selected');
+                } else {
+                    showInfo('❌ Failed to connect: ' + error.message);
+                    alert('Failed to connect: ' + error.message);
+                }
+            }
+        });
+
+        // Disconnect button - disconnects all sensors
+        disconnectBtn.addEventListener('click', async () => {
+            try {
+                await serialService.disconnectAsync();
+                
+                // Clear all sensor data
+                connectedSensors.clear();
+                activeSensorCount = 0;
+                sensorIdCounter = 0;
+                
+                // Update UI
+                updateSensorCount();
+                updateConnectionStatus();
+                updateSensorTable();
+                
+                showInfo('🔌 All sensors disconnected');
+            } catch (error) {
+                console.error('Disconnect error:', error);
+                alert('Failed to disconnect: ' + error.message);
+            }
+        });
+
+        // Initialize
+        console.log('✅ Kiwrious WebSerial SDK loaded successfully!');
+        console.log('📚 Library API:', serialService);
+        console.log('💡 Click "Connect Sensor" multiple times to connect multiple sensors');
+        updateSensorCount();
+        updateConnectionStatus();
+    </script>
+</body>
+</html>
