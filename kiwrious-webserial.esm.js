@@ -1,4 +1,4 @@
-// Kiwrious WebSerial SDK - ESM Build (Development)
+// Kiwrious WebSerial SDK - ESM Build
 // Version: 2.0.0
 
 var __create = Object.create;

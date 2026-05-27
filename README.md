@@ -310,10 +310,9 @@ npm run serve
 
 ## 📚 Documentation
 
-- **API Reference:** See `dist/README.md` after building
-- **Migration Guide:** See `dist/MIGRATION.md`
-- **Sensor Behaviors:** See `dist/SENSOR_BEHAVIORS.md`
-- **Quick Start:** See `dist/QUICKSTART.md`
+The full developer documentation lives at **[docs.kiwrious.com](https://docs.kiwrious.com/)** — installation, quickstart, the USB frame protocol, per-sensor pages, the SerialService API reference, and the v1.x → v2.x migration guide.
+
+Hosted ESM build: **[sdk.kiwrious.com](https://sdk.kiwrious.com/)** — import directly from `https://sdk.kiwrious.com/kiwrious-webserial.esm.min.js`.
 
 ## 🔍 Code Quality
 
@@ -339,8 +338,7 @@ npm run dev
 
 ## 🆘 Need Help?
 
-- Check `dist/README.md` for API documentation
-- Read `SENSOR_BEHAVIORS.md` for sensor-specific info
+- API and sensor behavior: [docs.kiwrious.com](https://docs.kiwrious.com/)
 - Check TypeScript errors with `npm run lint`
 - Test locally with `npm run dev`
 
